@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { weatherOnDays } from './store/daySlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
+import { ReactSearchAutocomplete } from 'react-search-autocomplete'
+import axios from "axios"
+import { useMemo } from 'react';
 
 function App() {
 
@@ -13,13 +15,39 @@ function App() {
     setCity(event.target.value)
   }
   const dispatch = useDispatch()
-
   const weatherOnDay = useSelector(state => state.daysWeather.daysWeather)
-
   const weatherNow = useSelector(state => state.daysWeather.weatherNow)
 
-  function submit(event) {
-    event.preventDefault()
+  const [citySearch, setCitySearch] = useState([])
+
+  const handleOnSearch = useMemo(() => (string, results) => {
+    axios({
+      method: 'get',
+      url: `https://api.api-ninjas.com/v1/city?name= ${string}&limit=30&country=UA`,
+      headers: { 'X-Api-Key': 'EOzrrsGSWJWRfdSI6dp8LA==Jcbym0OqpNWAIB7f' }
+
+    })
+      .then(function (response) {
+        const list = response.data.map(item => {
+          return {
+            id: item.name,
+            name: item.name
+          }
+        })
+        setCitySearch(list)
+        console.log(response)
+      })
+  }, [dispatch])
+
+  const handleOnSelect = useMemo(() =>
+    (item) => {
+      setCity(item.name)
+      submit()
+      // console.log(item);
+    }, [dispatch])
+
+  function submit() {
+    // event.preventDefault()
     weatherOnDays(dispatch, city)
   }
 
@@ -44,9 +72,15 @@ function App() {
               <div>min: <span>{weatherNow.tempMin}</span></div>
             </div>
           </div>
-          <input type='search' className='intup-city' value={city} onChange={searchCity}></input>
-          <FontAwesomeIcon icon={faMagnifyingGlass} className="duotone magnifying-glass icon-glass" onClick={submit} />
-          {/* <button onClick={submit}> <i class="fa-duotone fa-magnifying-glass icon-glass"></i></button> */}
+          {/* автозаполнение : npm install react-search-autocomplete или npm install --save react-autocomplete */}
+
+          <ReactSearchAutocomplete
+            items={citySearch}
+            onSearch={handleOnSearch}
+            onSelect={handleOnSelect}
+          />
+          {/* <input type='search' className='intup-city' value={city} onChange={searchCity}></input>
+          <FontAwesomeIcon icon={faMagnifyingGlass} className="duotone magnifying-glass icon-glass" onClick={submit} /> */}
           < div >
             <div className='date'>{weatherNow.date}</div>
           </div>
@@ -69,5 +103,4 @@ function App() {
 
   );
 }
-
 export default App;

@@ -16,7 +16,6 @@ const daySlice = createSlice({
         }
     }
 })
-
 export const weatherOnDays = async (dispatch, city) => {
     const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=ea2e638e299558709181a842b8507203`
     axios({
@@ -39,7 +38,6 @@ export const weatherOnDays = async (dispatch, city) => {
             })
                 .slice(0, 5)
                 .map(e => {
-
                     const date = new Date(e.dt_txt)
                     tempMaxMin(date)
                     const days = ['Sun', 'Mon', 'Tue', 'Wen', 'Thu', 'Fri', 'Sut']
@@ -71,7 +69,7 @@ export const weatherOnDays = async (dispatch, city) => {
             }
             dispatch(weatherNow({ cityData }))
 
-            console.log(response)
+            // console.log(response)
         })
 }
 export const { weather, weatherNow } = daySlice.actions
