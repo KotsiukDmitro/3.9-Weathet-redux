@@ -114,5 +114,13 @@
   color: aqua;
   cursor: pointer;
   margin-left: 5px;
+}
 
+.react-autosuggest__suggestions-container {
+  background-color: white;
+  cursor: pointer;
+}
+
+.react-autosuggest__container ul {
+  list-style: none;
 }

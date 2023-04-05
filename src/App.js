@@ -2,11 +2,11 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { weatherOnDays } from './store/daySlice';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
-import { ReactSearchAutocomplete } from 'react-search-autocomplete'
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
+import Autosuggest from 'react-autosuggest'
 import axios from "axios"
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 
 function App() {
 
@@ -20,12 +20,19 @@ function App() {
 
   const [citySearch, setCitySearch] = useState([])
 
-  const handleOnSearch = useMemo(() => (string, results) => {
+
+  // const handleOnSelect = useCallback((item) => {
+  //   setCity(item.name)
+  //   submit()
+  // }, [dispatch])
+
+
+  const getSuggestions = value => {
+    const inputValue = value.trim().toLowerCase()
     axios({
       method: 'get',
-      url: `https://api.api-ninjas.com/v1/city?name= ${string}&limit=30&country=UA`,
+      url: `https://api.api-ninjas.com/v1/city?name= ${inputValue}&limit=30&country=UA`,
       headers: { 'X-Api-Key': 'EOzrrsGSWJWRfdSI6dp8LA==Jcbym0OqpNWAIB7f' }
-
     })
       .then(function (response) {
         const list = response.data.map(item => {
@@ -37,18 +44,33 @@ function App() {
         setCitySearch(list)
         console.log(response)
       })
-  }, [dispatch])
+  }
+  const getSuggestionValue = suggestion => suggestion.name
+  // weatherOnDays(dispatch, city)
 
-  const handleOnSelect = useMemo(() =>
-    (item) => {
-      setCity(item.name)
-      submit()
-      // console.log(item);
-    }, [dispatch])
 
-  function submit() {
-    // event.preventDefault()
-    weatherOnDays(dispatch, city)
+  const renderSuggestion = suggestion => (
+    <div>
+      {suggestion.name}
+    </div>
+  )
+  const [value, setValue] = useState('Zaporizhzhia')
+
+  const onChange = (event, { newValue }) => {
+    setValue(newValue)
+  }
+  const onSuggestionsFetchRequested = ({ value }) => {
+    console.log(value);
+    setCity(getSuggestions(value))
+    weatherOnDays(dispatch, value)
+
+  }
+  const onSuggestionsClearRequested = () => {
+    setCitySearch([])
+  }
+  const inputProps = {
+    value: value,
+    onChange
   }
 
   useEffect(() => {
@@ -72,13 +94,15 @@ function App() {
               <div>min: <span>{weatherNow.tempMin}</span></div>
             </div>
           </div>
-          {/* автозаполнение : npm install react-search-autocomplete или npm install --save react-autocomplete */}
-
-          <ReactSearchAutocomplete
-            items={citySearch}
-            onSearch={handleOnSearch}
-            onSelect={handleOnSelect}
+          <Autosuggest
+            suggestions={citySearch}
+            getSuggestionValue={getSuggestionValue}
+            renderSuggestion={renderSuggestion}
+            onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+            onSuggestionsClearRequested={onSuggestionsClearRequested}
+            inputProps={inputProps}
           />
+
           {/* <input type='search' className='intup-city' value={city} onChange={searchCity}></input>
           <FontAwesomeIcon icon={faMagnifyingGlass} className="duotone magnifying-glass icon-glass" onClick={submit} /> */}
           < div >
@@ -100,7 +124,6 @@ function App() {
       </div>
     </div>
   </>
-
-  );
+  )
 }
 export default App;
