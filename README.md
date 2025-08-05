@@ -30,6 +30,7 @@ OpenWeatherMap API
 https://prnt.sc/xcYM26ztpDHA
 
 ## 🌍 Демо
+https://weathet-redux.vercel.app/
 
 🧠 Автор
 Kotsiuk Dmytro
